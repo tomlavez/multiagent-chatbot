@@ -3,11 +3,11 @@
 ## 📝 Sumário
 
 - [Motivação](#-motivação)
-- [Instalação](#️-instalação)
+- [Instalação](#ins)
 
 ## 🤩 Motivação
 
-<p align = "justify">Este projeto teve como motivação um desafio feito pela <a href="https://www.tech4h.com.br/">Tech4.ai</a> com o objetivo de desenvolver um agente conversacional que facilite a integração de novos funcionários na empresa ajudando-os a se familiarizar rapidamente com a cultura, políticas, programas e ferramentas de trabalho da empresa.</p>
+<p align = "justify">Este projeto teve como motivação um desafio feito pela <a href="https://www.tech4h.com.br/" target="_blank">Tech4.ai</a> com o objetivo de desenvolver um agente conversacional que facilite a integração de novos funcionários na empresa ajudando-os a se familiarizar rapidamente com a cultura, políticas, programas e ferramentas de trabalho da empresa.</p>
 
 ## ⚙️ Instalação
 
@@ -39,4 +39,4 @@ HUGGINGFACEHUB_API_TOKEN=XXXXXXXXXXXXXXXXXXX
 
 ### Google Cloud Console Account
 
-<p align = "justify"> Utilizaremos a API do google para automatizar a criação de eventos no Google Agendas. Para fazer isso é necessário ter uma conta, a qual pode ser criada <a href="https://console.cloud.google.com/welcome/new">aqui</a> e configurada seguindo este <a href="https://developers.google.com/calendar/api/quickstart/python?hl=pt-br">link</a>
+<p align = "justify"> Utilizaremos a API do google para automatizar a criação de eventos no Google Agendas. Para fazer isso é necessário ter uma conta, a qual pode ser criada <a href="https://console.cloud.google.com/welcome/new" target="_blank">aqui</a> e configurada seguindo este <a href="https://developers.google.com/calendar/api/quickstart/python?hl=pt-br" target="_blank">link</a>
