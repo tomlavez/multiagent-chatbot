@@ -3,7 +3,7 @@
 ## 📝 Sumário
 
 - [Motivação](#-motivação)
-- [Instalação](#ins)
+- [Instalação](#️-instalação)
 
 ## 🤩 Motivação
 
@@ -39,4 +39,4 @@ HUGGINGFACEHUB_API_TOKEN=XXXXXXXXXXXXXXXXXXX
 
 ### Google Cloud Console Account
 
-<p align = "justify"> Utilizaremos a API do google para automatizar a criação de eventos no Google Agendas. Para fazer isso é necessário ter uma conta, a qual pode ser criada <a href="https://console.cloud.google.com/welcome/new">aqui</a> e configurada seguindo este <a href="https://developers.google.com/calendar/api/quickstart/python?hl=pt-br">link</a>
+<p align = "justify"> Utilizaremos a API do google para automatizar a criação de eventos no Google Agendas. Para fazer isso é necessário ter uma conta, a qual pode ser criada <a href="https://console.cloud.google.com/welcome/new">aqui</a> e configurada seguindo este <a href="https://developers.google.com/calendar/api/quickstart/python?hl=pt-br">link</a>. Após isso será necessário baixar o json do OAuth 2.0 e adicionar ao projeto com nome de credentials.json.
