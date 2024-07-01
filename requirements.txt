@@ -9,3 +9,6 @@ langchain_huggingface==0.0.3
 langchain_text_splitters==0.2.2
 protobuf==5.27.2
 pydantic==2.7.4
+pypdf
+rapidocr-onnxruntime
+faiss-gpu
