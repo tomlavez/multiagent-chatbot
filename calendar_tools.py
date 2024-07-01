@@ -13,7 +13,7 @@ from typing import Type, Optional
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 
-def getCalendarEvents(numEvents=5, start_date=None, end_date=None):
+def getCalendarEvents(numEvents=5, start_date=None, end_date=None, attendees=[]):
     # Credentials
     creds = None
     if os.path.exists("token.json"):
@@ -42,35 +42,33 @@ def getCalendarEvents(numEvents=5, start_date=None, end_date=None):
         if end_date is None:
             end_date = dt.datetime.fromisoformat(start_date) + dt.timedelta(days=30)
             end_date = end_date.isoformat()
-        else:
-            end_date = dt.datetime.fromisoformat(end_date) + dt.timedelta(minutes=5)
-            end_date = end_date.isoformat()
 
-        event_result = (
-            service.events()
-            .list(
-                calendarId="primary",
-                timeMin=start_date + "-03:00",
-                timeMax=end_date + "-03:00",
-                maxResults=numEvents,
-                singleEvents=True,
-                orderBy="startTime",
-            )
-            .execute()
-        )
-
-        events = event_result.get("items", [])
         event_list = []
 
-        for event in events:
-            formatted_event = {
-                "summary": event["summary"],
-                "description": event["description"],
-                "location": event["location"],
-                "start": event["start"],
-                "end": event["end"],
-            }
-            event_list.append(formatted_event)
+        for attendee in attendees:
+            event_result = (
+                service.events()
+                .list(
+                    calendarId="primary",
+                    timeMin=start_date + "-03:00",
+                    timeMax=end_date + "-03:00",
+                    maxResults=numEvents,
+                    singleEvents=True,
+                    orderBy="startTime",
+                    q=attendee,
+                )
+                .execute()
+            )
+            events = event_result.get("items", [])
+            for event in events:
+                formatted_event = {
+                    "summary": event["summary"],
+                    "description": event["description"],
+                    "location": event["location"],
+                    "start": event["start"],
+                    "end": event["end"],
+                }
+                event_list.append(formatted_event)
 
         return event_list
 
@@ -91,6 +89,9 @@ class CalendarEventSearchInput(BaseModel):
     end_date: Optional[str] = Field(
         description="Data até a qual os eventos serão procurados. A data deve estar no formato RFC 3339, por exemplo, 2024-06-30T13:31:47. Se não fornecido, o padrão será trinta dias após a data de início."
     )
+    attendees: list = Field(
+        description="Lista de e-mails dos participantes. Esta lista será utilizada para identificar eventos nos quais essas pessoas foram convidadas. Certifique-se de que cada e-mail fornecido seja um endereço de e-mail válido."
+    )
 
 
 class GetCalendarEventsTool(BaseTool):
@@ -100,8 +101,8 @@ class GetCalendarEventsTool(BaseTool):
     """
     args_schema: Type[BaseModel] = CalendarEventSearchInput
 
-    def _run(self, numEvents: int, start_date: str, end_date: str):
-        events_response = getCalendarEvents(numEvents, start_date, end_date)
+    def _run(self, numEvents: int, start_date: str, end_date: str, attendees: list):
+        events_response = getCalendarEvents(numEvents, start_date, end_date, attendees)
         return events_response
 
 
@@ -128,8 +129,11 @@ def createCalendarEvent(
     if location is None:
         location = "Não informado"
 
+    if attendees == []:
+        return "Nenhum convidado adicionado!"
+
     # Check for conflicts
-    conflito = getCalendarEvents(start_date=start, end_date=end)
+    conflito = getCalendarEvents(start_date=start, end_date=end, attendees=attendees)
     if conflito:
         return "Conflito de horário!"
 
@@ -197,7 +201,7 @@ class CalendarCreateInput(BaseModel):
     end: Optional[str] = Field(
         description="Horário de término do evento a ser criado. Deve estar no formato RFC 3339, por exemplo, 2024-06-30T13:31:47."
     )
-    attendees: Optional[list] = Field(
+    attendees: list = Field(
         description="Lista dos email dos participantes ['email@gmail.com', 'segundoemail@gmail.com']"
     )
 
@@ -205,7 +209,7 @@ class CalendarCreateInput(BaseModel):
 class CreateCalendarEventTool(BaseTool):
     name = "create_calendar_event"
     description = """
-    Ferramenta para criar um evento no calendário do Google. É necessário passar o título, a localização, a descrição e o horário de início. O horário de término e a lista de participante são opcionais. Caso o primeiro não seja passado, o evento terá duração de 30 minutos. Caso o segundo não seja passado, o evento não terá convidados adicionais.
+    Ferramenta para criar um evento no calendário do Google. É necessário passar o título, a localização, a descrição, o horário de início e os participantes. O horário de término é opcional. Caso o primeiro não seja passado, o evento terá duração de 30 minutos.
     """
     args_schema: Type[BaseModel] = CalendarCreateInput
 
@@ -304,9 +308,15 @@ class SpecificTimeTool(BaseTool):
 
 
 if __name__ == "__main__":
-    print(dt.datetime.now().isoformat())
-    events = getCalendarEvents(
-        start_date="2024-07-03T20:00:00", end_date="2024-07-03T20:30:00"
+    res = createCalendarEvent(
+        summary="Teste",
+        location="Local",
+        description="Descrição",
+        start=dt.datetime.now().isoformat(),
+        attendees=[
+            "tomlavez@gmail.com",
+            "teste@gmail.com",
+        ],
     )
-    for event in events:
-        print(event)
+
+    print(res)
