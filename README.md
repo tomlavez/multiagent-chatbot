@@ -3,7 +3,9 @@
 ## 📝 Sumário
 
 - [Motivação](#-motivação)
+- [Resumo](#-resumo)
 - [Instalação](#️-instalação)
+- [Execução](#️-execução)
 
 ## 🤩 Motivação
 
