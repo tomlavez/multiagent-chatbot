@@ -13,7 +13,7 @@
 
 <p align = "justify">O projeto se consiste em uma aplicação de um chatbot, utilizando diferentes agentes com funções e ferramentas distintas. Além disso ele apresenta um sistema de agendamento de eventos no google agendas, porém só é possível agendar e consultar eventos existentes. Nota-se que só será possível consultar eventos que foram marcados pelo próprio chatbot, visto que ele estará associado a uma agenda própria. Para acessar o chat, será necessário criar um cadastro, fornecendo nome, senha e email. O acesso de todas as funcionalidades é feito através de verbos HTTP que acionarão a Api do projeto.</p>
 
-## ⚙️ Instalação
+## 🔧 Instalação
 
 ### Clonando o repositório
 
@@ -49,7 +49,7 @@ HUGGINGFACEHUB_API_TOKEN=XXXXXXXXXXXXXXXXXXX
 
 <p align = "justify"> Como padrão do framework FastApi, a api está rodando em http://localhost:8000, definido no arquivo app.py na variável API_URL.
 
-## Execução
+## ⚙️ Execução
 
 <p align = "justify"> Para executar o projeto são necessários dois comandos, um para iniciar a api e outro para iniciar o frontend da aplicação, são eles: </p>
 
