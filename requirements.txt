@@ -1,6 +1,7 @@
 google_api_python_client==2.135.0
 google_auth_oauthlib==1.2.0
 gradio==4.37.2
+streamlit
 langchain==0.2.6
 langchain_community==0.2.6
 langchain_core==0.2.10
@@ -12,3 +13,8 @@ pydantic==2.7.4
 pypdf
 rapidocr-onnxruntime
 faiss-gpu
+fastapi
+uvicorn
+pyjwt
+passlib[bcrypt]
+requests

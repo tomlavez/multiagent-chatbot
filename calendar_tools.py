@@ -1,5 +1,6 @@
 import datetime as dt
 import os.path
+import sqlite3
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -75,6 +76,7 @@ def getCalendarEvents(numEvents=5, start_date=None, end_date=None, attendees=[])
     # Handle errors
     except HttpError as error:
         print(f"An error occurred: {error}")
+        return "Erro ao buscar eventos!"
 
 
 class CalendarEventSearchInput(BaseModel):
@@ -183,6 +185,7 @@ def createCalendarEvent(
     # Handle errors
     except HttpError as error:
         print(f"An error occurred: {error}")
+        return "Um erro ocorreu: {error}"
 
 
 class CalendarCreateInput(BaseModel):
@@ -307,16 +310,34 @@ class SpecificTimeTool(BaseTool):
         return specific_time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-if __name__ == "__main__":
-    res = createCalendarEvent(
-        summary="Teste",
-        location="Local",
-        description="Descrição",
-        start=dt.datetime.now().isoformat(),
-        attendees=[
-            "tomlavez@gmail.com",
-            "teste@gmail.com",
-        ],
-    )
+def getUserEmail(username=[]):
+    conn = sqlite3.connect("usuarios.sqlite")
+    emails = []
+    for name in username:
+        c = conn.cursor()
+        c.execute(
+            "SELECT email FROM usuarios WHERE username = ?",
+            (name,),
+        )
+        email = c.fetchone()
+        if email:
+            emails.append(email[0])
+        if not email:
+            conn.close()
+            return "Usuário não encontrado!"
+    conn.close()
+    return emails
 
-    print(res)
+
+class GetUserEmailInput(BaseModel):
+    username: list = Field(description="Lista dos nomes cujos emails serão buscados.")
+
+
+class GetUserEmailTool(BaseTool):
+    name = "get_user_email"
+    description = "Obtém o email a partir do nome. Por exemplo, se você deseja enviar um convite para um evento para João, mas não tem o email dele, você pode usar essa ferramenta para obter o email de João."
+    args_schema: Type[BaseModel] = GetUserEmailInput
+
+    def _run(self, username: list):
+        emails = getUserEmail(username)
+        return emails
