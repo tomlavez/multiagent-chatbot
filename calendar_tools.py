@@ -184,8 +184,8 @@ def createCalendarEvent(
 
     # Handle errors
     except HttpError as error:
-        print(f"An error occurred: {error}")
-        return "Um erro ocorreu: {error}"
+        msg = error.message
+        return "Um erro ocorreu: " + msg
 
 
 class CalendarCreateInput(BaseModel):

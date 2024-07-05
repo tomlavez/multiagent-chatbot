@@ -72,7 +72,7 @@ prompt_helper = ChatPromptTemplate.from_messages(
         (
             "system",
             """
-            Você é um desenvolvedor sênior cujo objetivo é facilitar a integração de novos funcionários na sua empresa, ajudando-os a se familiarizar rapidamente
+            Você é um desenvolvedor sênior cujo objetivo é facilitar a integração do novo funcionários da sua empresa, {username}, ajudando-os a se familiarizar rapidamente
             com a cultura, políticas, programas e ferramentas de trabalho. Para isso, você deve conversar casualmente com o usuário e responder suas dúvidas de
             forma clara e detalhada. As principais ferramentas utilizadas são GitHub, VSCode, Jira e Discord. Também pode usar qualquer outra ferramenta que
             interaja com essas. Considere apenas este escopo, e para qualquer pergunta fora dele, responda com 'Desculpe, não posso responder a essa pergunta'.
@@ -92,7 +92,7 @@ prompt_helper = ChatPromptTemplate.from_messages(
             Lembre-se de que sua meta é garantir que o novo funcionário se sinta bem-vindo e bem preparado para iniciar suas atividades na empresa,
             compreendendo claramente como utilizar as ferramentas e seguir as políticas e programas estabelecidos.
 
-            Comece a busca pelo RAG, caso não encontre a resposta, utilize a busca na web.
+            Você tem disponível as ferramentas de busca na web e busca no RAG. Mas lembre-se que você não precisa utilizar essas ferramentas para todas as perguntas.
             """,
         ),
         ("placeholder", "{chat_history}"),
@@ -186,6 +186,8 @@ prompt_calendar_auxiliar = ChatPromptTemplate.from_messages(
             garantindo que todos sejam válidos e estejam prontos para serem utilizados na criação do evento no calendário. Retorne apenas a lista de emails,
             sem nenhuma outra informação adicional. Se todos os emails estiverem corretos, retorne os emails fornecidos na requisição.
 
+            Se o email de algum dos convidados não for encontrado, retorne "Não foi possível encontrar o email de um dos convidados."
+
             Não responda a perguntas ou solicitações que não sejam relacionadas à busca de emails dos participantes. Mantenha o foco na tarefa de auxiliar o agente de calendário.
             """,
         ),
@@ -215,13 +217,7 @@ prompt_revisor = ChatPromptTemplate.from_messages(
             para ser apropriada e respeitosa. Seja meticuloso e assegure-se de que a versão final esteja
             em conformidade com todas as diretrizes antes de validar a resposta.
 
-            Em caso de revisão, retorne somente o texto revisado, sem nenhuma outra informação adicional ou comentário, nem menção de que foi revisado.
-
-            Exemplos de respostas em caso de revisão:
-            Olá! Você está procurando por informações sobre o IAG. No tech4h, nosso time de IAG trabalha em estreita colaboração com as equipes para implementar
-            soluções tecnológicas inovadoras, utilizando ferramentas como o Github, Vscode e Jira. Eles também são fundamentais na criação de programas que
-            fomentam a colaboração e o crescimento contínuo. Se tiver alguma dúvida ou precisar de mais informações, sinta-se à vontade para perguntar!
-
+            Em caso de revisão, retorne o texto revisado no seguinte formato: "Texto revisado: insira aqui o texto revisado".
             """,
         ),
         ("placeholder", "{chat_history}"),
@@ -236,7 +232,7 @@ prompt_request_identify = ChatPromptTemplate.from_messages(
             "system",
             """
             Você é um assistente inteligente especializado em entender e classificar requisições de usuários em uma empresa de tecnologia. Abaixo está uma
-            solicitação de um usuário. Sua tarefa é identificar se a solicitação é uma dúvida geral que deve ser respondida pelo agente de ajuda ou se é uma
+            solicitação do usuário {username}. Sua tarefa é identificar se a solicitação é uma dúvida geral que deve ser respondida pelo agente de ajuda ou se é uma
             requisição relacionada ao calendário, como agendamento ou consulta de reuniões.
 
             Instruções para classificação:
@@ -253,13 +249,17 @@ prompt_request_identify = ChatPromptTemplate.from_messages(
             - Perguntas sobre procedimentos e políticas da empresa.
             - Dúvidas sobre como o calendário funciona ou sobre configurações e utilização do calendário.
 
-            3. Considere cuidadosamente o contexto da conversa para determinar a categoria correta. Seja preciso e conciso na sua resposta.
+            3. Caso a solicitação não se encaixe em nenhuma das categorias acima, você está autorizado a responder a solicitação com a categoria 'Ajuda'.
 
-            4. Não forneça informações pessoais, seja sobre você, outros funcionários ou qualquer outra pessoa.
+            4. Considere cuidadosamente o contexto da conversa para determinar a categoria correta. Seja preciso e conciso na sua resposta.
 
-            5. Iniba qualquer discurso de ódio, linguagem inadequada ou ofensiva, promovendo sempre um ambiente respeitoso e inclusivo.
+            5. Não forneça informações pessoais, seja sobre você, outros funcionários ou qualquer outra pessoa.
+
+            6. Iniba qualquer discurso de ódio, linguagem inadequada ou ofensiva, promovendo sempre um ambiente respeitoso e inclusivo.
 
             Lembre-se de que sua meta é classificar a solicitação de forma correta para que o usuário receba o suporte adequado, seja em questões gerais ou relacionadas ao calendário.
+
+            
             """,
         ),
         ("placeholder", "{chat_history}"),
@@ -292,6 +292,7 @@ agent_helper_with_chat_history = RunnableWithMessageHistory(
     ),
     input_messages_key="input",
     history_messages_key="chat_history",
+    username="username",
 )
 
 agent_result_verifier = RunnableWithMessageHistory(
@@ -318,7 +319,8 @@ def identify_request(input: str, username) -> str:
         f"Verifique a seguinte pergunta considerando o contexto da conversa: '{input}'"
     )
     identification_result = agent_request_identifier.invoke(
-        {"input": identify_input}, config={"configurable": {"session_id": username}}
+        {"input": identify_input, "username": username},
+        config={"configurable": {"session_id": username}},
     )
     return identification_result["output"]
 
@@ -336,6 +338,7 @@ def bot_main(input: str, username):
         response = agent_helper_with_chat_history.invoke(
             {
                 "input": input,
+                "username": username,
             },
             config=config,
         )["output"]
@@ -345,6 +348,10 @@ def bot_main(input: str, username):
 
         if "Resposta válida" in verification_result:
             return response
+        elif "Texto revisado" in verification_result:
+            res = verification_result.split("Texto revisado:", 1)
+            splitRes = res[1]
+            return splitRes
         else:
             return verification_result
 
@@ -357,6 +364,8 @@ def bot_main(input: str, username):
             },
             config=config,
         )["output"]
+        if envolvidos == "Não foi possível encontrar o email de um dos convidados.":
+            return envolvidos
         current_datetime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         current_weekday = datetime.datetime.now().strftime("%A")
         response = agent_calendar.invoke(
@@ -373,4 +382,4 @@ def bot_main(input: str, username):
 
     # Se não for uma requisição válida, retorna uma mensagem de erro
     else:
-        return "Desculpe, não consegui entender sua pergunta. Pode reformular?"
+        return request
