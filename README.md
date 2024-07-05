@@ -47,9 +47,12 @@ HUGGINGFACEHUB_API_TOKEN=XXXXXXXXXXXXXXXXXXX
 
 <p align = "justify"> Utilizaremos a API do google para automatizar a criação de eventos no Google Agendas. Para fazer isso é necessário ter uma conta, onde todos os eventos marcados estarão, a qual pode ser criada <a href="https://console.cloud.google.com/welcome/new">aqui</a> e configurada seguindo este <a href="https://developers.google.com/calendar/api/quickstart/python?hl=pt-br">link</a>. Após isso será necessário baixar o json do OAuth 2.0 e adicionar ao projeto com nome de credentials.json.
 
-### Api
+### URL's
 
-<p align = "justify"> Como padrão do framework FastApi, a api está rodando em http://localhost:8000, definido no arquivo app.py na variável API_URL.
+<p align = "justify"> O projeto utiliza url's do localhost por padrão: <li> Frontend: http://localhost:8501 </li>
+<li> Api: http://localhost:8000 </li>
+Note que caso o url da api seja alterado, é necessário atualizar a variável API_URL do arquivo app.py para estar de acordo
+</p>
 
 ## ⚙️ Execução
 
@@ -58,7 +61,7 @@ HUGGINGFACEHUB_API_TOKEN=XXXXXXXXXXXXXXXXXXX
 ```
 uvicorn api:app --reload
 
-streamlit run .\app.py
+streamlit run app.py
 ```
 
 <p align = "justify"> A depender do ambiente pode ser necessário adicionar "python -m" antes dos comandos </p>
