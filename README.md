@@ -53,6 +53,7 @@ HUGGINGFACEHUB_API_TOKEN=XXXXXXXXXXXXXXXXXXX
 <li> Api: http://localhost:8000 </li>
 Note que caso o url da api seja alterado, é necessário atualizar a variável API_URL do arquivo app.py para estar de acordo
 </p>
+<p align = "justify"> A documentação da API pode ser encontrada em http://localhost:8000/docs. </p>
 
 ## ⚙️ Execução
 
