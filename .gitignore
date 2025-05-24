@@ -1,0 +1,8 @@
+.env
+__pycache__
+credentials.json
+token.json
+usuarios.sqlite
+user_messages.db
+tmp/
+tokens/
