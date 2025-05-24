@@ -16,17 +16,17 @@ def get_calendar_credentials():
     Obtem as credenciais do calendário
     """
     creds = None
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    if os.path.exists("auth/token.json"):
+        creds = Credentials.from_authorized_user_file("auth/token.json", SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file("config/credentials.json", SCOPES)
             creds = flow.run_local_server(port=0)
 
-        with open("token.json", "w") as token:
+        with open("auth/token.json", "w") as token:
             token.write(creds.to_json())
     
     return creds
@@ -249,7 +249,7 @@ def get_user_email(username: str):
 
     username = username.lower()
 
-    conn = sqlite3.connect("usuarios.sqlite")
+    conn = sqlite3.connect("database/usuarios.sqlite")
     c = conn.cursor()
     c.execute(
         "SELECT email FROM usuarios WHERE username = ?",
