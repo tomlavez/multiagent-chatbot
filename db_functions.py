@@ -7,7 +7,7 @@ import json
 def cadastrar_usuario(username, password, email):
     conn = sqlite3.connect("usuarios.sqlite")
     c = conn.cursor()
-    c.execute("SELECT * FROM usuarios WHERE username = ?", (username,))
+    c.execute("SELECT * FROM usuarios WHERE username = ? OR email = ?", (username, email))
     if c.fetchone():
         return "Usuário já existe."
     c.execute(
@@ -33,41 +33,4 @@ def login_usuario(username, password):
     return None
 
 
-def get_message_history(username):
-    conn = sqlite3.connect("usuarios.sqlite")
-    c = conn.cursor()
-    c.execute(
-        "SELECT message_history FROM historico_mensagens WHERE username = ?",
-        (username,),
-    )
-    history = c.fetchone()
-    conn.close()
-    if history:
-        return json.loads(history[0])
-    return []
 
-
-def save_message_history(username, chat_history):
-    conn = sqlite3.connect("usuarios.sqlite")
-    c = conn.cursor()
-    c.execute("SELECT * FROM historico_mensagens WHERE username = ?", (username,))
-    if c.fetchone():
-        c.execute(
-            "UPDATE historico_mensagens SET message_history = ? WHERE username = ?",
-            (json.dumps(chat_history), username),
-        )
-    else:
-        c.execute(
-            "INSERT INTO historico_mensagens (username, message_history) VALUES (?, ?)",
-            (username, json.dumps(chat_history)),
-        )
-    conn.commit()
-    conn.close()
-
-
-def add_user_message(chat_history, message):
-    chat_history.append({"role": "user", "messages": message})
-
-
-def add_ai_message(chat_history, message):
-    chat_history.append({"role": "ai", "content": message})
