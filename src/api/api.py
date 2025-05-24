@@ -2,8 +2,8 @@ from typing import Dict
 from fastapi import Depends, FastAPI, HTTPException, Header
 from pydantic import BaseModel
 import sqlite3
-from db_functions import cadastrar_usuario, login_usuario
-from agents_main import bot_main
+from .db_functions import cadastrar_usuario, login_usuario
+from ..agents.agents_main import bot_main
 import secrets
 import os.path
 from google.auth.transport.requests import Request
@@ -21,7 +21,7 @@ app = FastAPI()
 
 # Inicialização do Banco de Dados
 def init_db():
-    conn = sqlite3.connect("usuarios.sqlite")
+    conn = sqlite3.connect("database/usuarios.sqlite")
     c = conn.cursor()
     c.execute(
         """
@@ -107,8 +107,8 @@ def check_calendar_credentials(user_email: str, permission_level: str = "full_ac
     scopes = CALENDAR_SCOPES.get(permission_level, CALENDAR_SCOPES["full_access"])
     
     # Caminho personalizado para o token do usuário com base na permissão
-    token_path = f"tokens/{user_email}_{permission_level}_token.json"
-    os.makedirs("tokens", exist_ok=True)
+    token_path = f"auth/tokens/{user_email}_{permission_level}_token.json"
+    os.makedirs("auth/tokens", exist_ok=True)
     
     # Verificar se as credenciais existem e são válidas
     if os.path.exists(token_path):
@@ -124,7 +124,7 @@ def check_calendar_credentials(user_email: str, permission_level: str = "full_ac
                 creds = None
         
         if not creds:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", scopes)
+            flow = InstalledAppFlow.from_client_secrets_file("config/credentials.json", scopes)
             creds = flow.run_local_server(port=0)
         
         # Salvar as credenciais para o próximo uso
@@ -154,7 +154,7 @@ def login(user: UserLogin):
     logged_user = login_usuario(user.username, user.password)
     if logged_user:
         # Obter o email do usuário
-        conn = sqlite3.connect("usuarios.sqlite")
+        conn = sqlite3.connect("database/usuarios.sqlite")
         c = conn.cursor()
         c.execute("SELECT email FROM usuarios WHERE username = ?", (user.username,))
         result = c.fetchone()
@@ -205,7 +205,7 @@ def reset_calendar_auth(current_user: dict = Depends(get_current_user)):
     
     # Remove todos os tokens de calendário do usuário
     import glob
-    token_pattern = f"tokens/{user_email}_*_token.json"
+    token_pattern = f"auth/tokens/{user_email}_*_token.json"
     for token_file in glob.glob(token_pattern):
         try:
             os.remove(token_file)

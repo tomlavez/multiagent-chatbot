@@ -5,7 +5,7 @@ import json
 
 # Funções de Cadastro e Login
 def cadastrar_usuario(username, password, email):
-    conn = sqlite3.connect("usuarios.sqlite")
+    conn = sqlite3.connect("database/usuarios.sqlite")
     c = conn.cursor()
     c.execute("SELECT * FROM usuarios WHERE username = ? OR email = ?", (username, email))
     if c.fetchone():
@@ -20,7 +20,7 @@ def cadastrar_usuario(username, password, email):
 
 
 def login_usuario(username, password):
-    conn = sqlite3.connect("usuarios.sqlite")
+    conn = sqlite3.connect("database/usuarios.sqlite")
     c = conn.cursor()
     c.execute(
         "SELECT * FROM usuarios WHERE username = ? AND password = ?",

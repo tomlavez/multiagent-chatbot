@@ -3,10 +3,10 @@ import dotenv
 import datetime
 
 # Prompts
-from prompts.calendar import prompt_calendar, prompt_calendar_auxiliar
-from prompts.revisor import prompt_revisor
-from prompts.helper import prompt_helper
-from prompts.identifier import prompt_identifier
+from .prompts.calendar import prompt_calendar, prompt_calendar_auxiliar
+from .prompts.revisor import prompt_revisor
+from .prompts.helper import prompt_helper
+from .prompts.identifier import prompt_identifier
 
 # Agno
 from agno.storage.sqlite import SqliteStorage
@@ -15,7 +15,7 @@ from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 
 # Tools
-from tools.calendar_tools import (
+from ..tools.calendar_tools import (
     get_calendar_events,
     create_calendar_event,
     current_time_tool,
@@ -25,9 +25,9 @@ from tools.calendar_tools import (
     edit_calendar_event,
     delete_calendar_event,
 )
-from tools.rag_tool import search_knowledge_base
+from ..tools.rag_tool import search_knowledge_base
 
-dotenv.load_dotenv()
+dotenv.load_dotenv("config/.env")
 
 calendar_tools = [
     get_calendar_events,
@@ -51,7 +51,7 @@ helper_agent = Agent(
     model=OpenAIChat(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY")),
     instructions=prompt_helper,
     tools=tools_search,
-    storage=SqliteStorage(table_name="agent_sessions", db_file="tmp/data.db"),
+    storage=SqliteStorage(table_name="agent_sessions", db_file="database/tmp/data.db"),
     add_history_to_messages=True,
     num_history_runs=5,
     show_tool_calls=True,
@@ -76,7 +76,7 @@ calendar_agent = Agent(
     model=OpenAIChat(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY")),
     instructions=prompt_calendar,
     tools=calendar_tools,
-    storage=SqliteStorage(table_name="agent_sessions", db_file="tmp/data.db"),
+    storage=SqliteStorage(table_name="agent_sessions", db_file="database/tmp/data.db"),
     add_history_to_messages=True,
     num_history_runs=5,
     show_tool_calls=True,
@@ -87,7 +87,7 @@ auxiliar_calendar_agent = Agent(
     model=OpenAIChat(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY")),
     instructions=prompt_calendar_auxiliar,
     tools=auxiliar_calendar_tools,
-    storage=SqliteStorage(table_name="agent_sessions", db_file="tmp/data.db"),
+    storage=SqliteStorage(table_name="agent_sessions", db_file="database/tmp/data.db"),
     add_history_to_messages=True,
     num_history_runs=5,
     show_tool_calls=True,
