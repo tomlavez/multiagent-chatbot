@@ -1,6 +1,5 @@
 # Configuração do Banco de Dados
 import sqlite3
-import json
 
 
 # Funções de Cadastro e Login

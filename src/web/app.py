@@ -4,9 +4,9 @@ import streamlit as st
 API_URL = "http://localhost:8000"
 
 # Streamlit App
-st.title("Chatbot de Integração")
+st.title("Integration Chatbot")
 
-# Inicializando o estado da sessão
+# Initializing session state
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "username" not in st.session_state:
@@ -20,29 +20,29 @@ if "calendar_permissions" not in st.session_state:
 if "redirect_to_login" not in st.session_state:
     st.session_state.redirect_to_login = False
 
-# Definindo as opções de permissões
+# Defining permission options
 PERMISSION_OPTIONS = {
     "readonly": {
-        "label": "🔍 Apenas Leitura",
-        "description": "Visualizar eventos do calendário",
-        "capabilities": ["Visualizar eventos", "Buscar eventos por data/participantes"],
-        "restrictions": ["Não pode criar eventos", "Não pode editar eventos", "Não pode deletar eventos"]
+        "label": "🔍 Read Only",
+        "description": "View calendar events",
+        "capabilities": ["View events", "Search events by date/participants"],
+        "restrictions": ["Cannot create events", "Cannot edit events", "Cannot delete events"]
     },
     "read_update": {
-        "label": "📝 Leitura e Edição",
-        "description": "Visualizar e modificar eventos existentes",
-        "capabilities": ["Visualizar eventos", "Buscar eventos", "Editar eventos existentes", "Atualizar detalhes de eventos"],
-        "restrictions": ["Não pode criar novos eventos", "Não pode deletar eventos"]
+        "label": "📝 Read and Edit",
+        "description": "View and modify existing events",
+        "capabilities": ["View events", "Search events", "Edit existing events", "Update event details"],
+        "restrictions": ["Cannot create new events", "Cannot delete events"]
     },
     "full_access": {
-        "label": "🔧 Acesso Completo",
-        "description": "Controle total do calendário",
-        "capabilities": ["Visualizar eventos", "Buscar eventos", "Criar novos eventos", "Editar eventos existentes", "Deletar eventos", "Gerenciar calendários secundários"],
+        "label": "🔧 Full Access",
+        "description": "Complete calendar control",
+        "capabilities": ["View events", "Search events", "Create new events", "Edit existing events", "Delete events", "Manage secondary calendars"],
         "restrictions": []
     }
 }
 
-menu = ["Login", "Cadastro"]
+menu = ["Login", "Register"]
 choice = st.sidebar.radio("Menu", options=menu)
 
 # Redirect to login after successful registration
@@ -51,12 +51,12 @@ if st.session_state.redirect_to_login:
     st.session_state.redirect_to_login = False
 
 if not st.session_state.logged_in:
-    if choice == "Cadastro":
-        st.subheader("Cadastro de Novo Usuário")
-        new_user = st.text_input("Nome de Usuário")
-        new_password = st.text_input("Senha", type="password")
+    if choice == "Register":
+        st.subheader("New User Registration")
+        new_user = st.text_input("Username")
+        new_password = st.text_input("Password", type="password")
         new_email = st.text_input("Email")
-        if st.button("Cadastrar"):
+        if st.button("Register"):
             res = requests.post(
                 f"{API_URL}/register",
                 json={
@@ -74,34 +74,34 @@ if not st.session_state.logged_in:
 
     elif choice == "Login":
         st.subheader("Login")
-        username = st.text_input("Nome de Usuário")
-        password = st.text_input("Senha", type="password")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
         
-        # Seleção de permissões do calendário
-        st.subheader("🗓️ Permissões do Google Calendar")
-        st.write("Escolha o nível de acesso que você deseja para o calendário:")
+        # Calendar permissions selection
+        st.subheader("🗓️ Google Calendar Permissions")
+        st.write("Choose the level of access you want for the calendar:")
         
         permission_choice = st.radio(
-            "Selecione as permissões:",
+            "Select permissions:",
             options=list(PERMISSION_OPTIONS.keys()),
             format_func=lambda x: PERMISSION_OPTIONS[x]["label"],
-            help="Diferentes níveis de permissão determinam quais ações o chatbot pode realizar no seu calendário"
+            help="Different permission levels determine which actions the chatbot can perform on your calendar"
         )
         
-        # Mostrar detalhes da permissão selecionada
+        # Show details of selected permission
         selected_permission = PERMISSION_OPTIONS[permission_choice]
         
-        with st.expander("ℹ️ Detalhes da Permissão Selecionada", expanded=False):
+        with st.expander("ℹ️ Selected Permission Details", expanded=False):
             st.write(f"**{selected_permission['label']}**")
             st.write(selected_permission['description'])
             
             if selected_permission['capabilities']:
-                st.write("**✅ Funcionalidades disponíveis:**")
+                st.write("**✅ Available features:**")
                 for capability in selected_permission['capabilities']:
                     st.write(f"• {capability}")
             
             if selected_permission['restrictions']:
-                st.write("**❌ Restrições:**")
+                st.write("**❌ Restrictions:**")
                 for restriction in selected_permission['restrictions']:
                     st.write(f"• {restriction}")
         
@@ -126,13 +126,13 @@ if not st.session_state.logged_in:
                 st.success(response_data["message"])
                 
                 # Show permission status
-                st.success(f"Permissão selecionada: {selected_permission['label']}")
+                st.success(f"Selected permission: {selected_permission['label']}")
                 
                 # If calendar authentication is needed/succeeded
                 if st.session_state.calendar_auth:
-                    st.success("Autenticação com Google Calendar realizada com sucesso!")
+                    st.success("Google Calendar authentication completed successfully!")
                 else:
-                    st.warning("Não foi possível autenticar com o Google Calendar. Algumas funcionalidades podem estar limitadas.")
+                    st.warning("Could not authenticate with Google Calendar. Some features may be limited.")
             elif res.status_code == 400:
                 st.warning(res.json()["detail"])
             else:
@@ -140,23 +140,23 @@ if not st.session_state.logged_in:
             
             st.rerun()
 else:
-    st.subheader(f"Chatbot - Usuário: {st.session_state.username}")
+    st.subheader(f"Chatbot - User: {st.session_state.username}")
 
     # Show calendar authentication and permission status
     with st.sidebar:
-        st.subheader("🗓️ Status do Calendar")
+        st.subheader("🗓️ Calendar Status")
         if st.session_state.calendar_auth:
-            st.success("Google Calendar: Conectado")
+            st.success("Google Calendar: Connected")
         else:
-            st.warning("Google Calendar: Não conectado")
+            st.warning("Google Calendar: Not connected")
         
         # Show current permissions
         if st.session_state.calendar_permissions:
             perm_info = PERMISSION_OPTIONS[st.session_state.calendar_permissions]
-            st.info(f"**Permissões:** {perm_info['label']}")
+            st.info(f"**Permissions:** {perm_info['label']}")
             
             # Option to change permissions
-            if st.button("🔧 Alterar Permissões"):
+            if st.button("🔧 Change Permissions"):
                 # Reset calendar auth to force re-authentication with new permissions
                 st.session_state.calendar_auth = False
                 headers = {"token": st.session_state.token}
@@ -168,12 +168,12 @@ else:
                 st.session_state.token = ""
                 st.session_state.calendar_auth = False
                 st.session_state.calendar_permissions = ""
-                st.success("Usuário desconectado. Faça login novamente para alterar as permissões.")
+                st.success("User logged out. Please log in again to change permissions.")
                 st.rerun()
 
-    message = st.text_input("Você:")
-    if st.button("Enviar") and message:
-        # Obter resposta do chatbot
+    message = st.text_input("You:")
+    if st.button("Send") and message:
+        # Get chatbot response
         headers = {"token": st.session_state.token}
         try:
             response = requests.post(
@@ -190,10 +190,10 @@ else:
                 st.session_state.redirect_to_login = True
                 st.rerun()
             else:
-                st.error("Erro ao comunicar com o servidor. Por favor, tente novamente.")
+                st.error("Error communicating with server. Please try again.")
                 
         except Exception as e:
-            st.error(f"Erro durante a comunicação: {str(e)}")
+            st.error(f"Error during communication: {str(e)}")
     
     if st.button("Logout"):
         st.session_state.logged_in = False
@@ -201,6 +201,6 @@ else:
         st.session_state.token = ""
         st.session_state.calendar_auth = False
         st.session_state.calendar_permissions = ""
-        st.success("Você saiu com sucesso.")
+        st.success("You have successfully logged out.")
         st.rerun()
 

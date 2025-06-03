@@ -2,8 +2,8 @@ from typing import Dict
 from fastapi import Depends, FastAPI, HTTPException, Header
 from pydantic import BaseModel
 import sqlite3
-from .db_functions import cadastrar_usuario, login_usuario
-from ..agents.agents_main import bot_main
+from src.api.db_functions import cadastrar_usuario, login_usuario
+from src.agents.agents_main import bot_main
 import secrets
 import os.path
 from google.auth.transport.requests import Request
