@@ -77,8 +77,11 @@ def get_calendar_events(numEvents=5, start_date=None, end_date=None, attendees=[
             events = event_result.get("items", [])
             for event in events:
                 attendees = []
-                for attend in event["attendees"]:
-                    attendees.append(attend['email'])
+                if not event["attendees"]:
+                    attendees.append("Only the user is invited to this event.")
+                else:
+                    for attend in event["attendees"]:
+                        attendees.append(attend['email'])
 
                 formatted_event = {
                     "summary": event.get("summary", "Sem título"),

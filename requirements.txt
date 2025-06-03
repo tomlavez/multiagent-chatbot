@@ -1,47 +1,14 @@
-# Google Calendar API dependencies
-google-api-python-client==2.135.0
-google-auth-oauthlib==1.2.0
-
-# Web frameworks
-fastapi>=0.113.0
-uvicorn>=0.27.1
-streamlit>=1.32.0
-
-# API and authentication
-pyjwt>=2.8.0
-passlib[bcrypt]>=1.7.4
-requests>=2.31.0
-
-# Agno - Agent Framework
-agno>=0.1.25
-agno-tools>=0.1.0
-duckduckgo-search>=5.0.0
-yfinance>=0.2.35
-
-# Core LLM dependencies
-pydantic>=2.7.4
-python-dotenv>=1.0.0
-openai>=1.20.0
-groq>=0.4.0
-
-# LangGraph dependencies (legacy)
-langgraph>=0.0.26
-langchain>=0.0.325
-langchain-groq>=0.0.6
-langchain-core>=0.1.17
-
-# Document processing
-protobuf==5.27.2
-pypdf>=4.0.1
-
-# Tools
-tavily-python>=0.2.2
-rapidocr-onnxruntime>=1.3.11
-faiss-cpu>=1.7.4
-
-# Security
-cryptography>=41.0.7
-
-# Development & testing
-pytest>=7.4.3
-black>=23.11.0
+uvicorn==0.34.3
+fastapi==0.115.12
+dotenv==0.9.9
+agno==1.5.6
+sqlalchemy==2.0.41
+tavily-python==0.7.3
+openai==1.83.0
+sentence-transformers==4.1.0
+pypdf==5.6.0
+pgvector==0.4.1
+google_auth_oauthlib==1.2.2
+google-api-python-client==2.170.0
+psycopg==3.2.9
+streamlit==1.45.1
