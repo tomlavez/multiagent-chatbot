@@ -89,6 +89,8 @@ multiagent-chatbot/
 │   └── tmp/                   # Agent temporary data
 ├── data/                        # Documents for RAG
 ├── docs/                        # Documentation
+│   ├── videos/                # Demo videos
+│   └── screenshots/           # Setup and app screenshots
 ├── run_api.py                   # Script to run the API
 ├── run_web.py                   # Script to run the web interface (English)
 └── requirements.txt             # Python dependencies
@@ -155,7 +157,6 @@ Edit the `config/.env` file with your API keys:
 ```env
 OPENAI_API_KEY=your_openai_key_here
 TAVILY_API_KEY=your_tavily_key_here
-HUGGINGFACEHUB_API_TOKEN=your_huggingface_token_here
 
 # pgvector Database Configuration
 PGVECTOR_HOST=localhost
@@ -315,7 +316,7 @@ The setup process involves:
    - Click **"CREATE"**
    - A popup will show your client ID and secret
 
-   ![OAuth Credential](docs/screnshots/step5-oauth-credentials.png)
+   ![OAuth Credential](docs/screenshots/step5-oauth-credentials.png)
 
 ---
 
@@ -488,6 +489,32 @@ All agent prompts are configured in English for consistent international usage:
 - **RAG System**: Local knowledge base queries with pgvector
 - **Time System**: Date and time manipulation tools
 - **Vector Database**: Enhanced document search capabilities
+
+## Dependencies
+
+### Core Dependencies
+- `fastapi==0.115.12` - Web API framework
+- `streamlit==1.45.1` - Web interface
+- `openai==1.83.0` - OpenAI API client
+- `uvicorn==0.34.3` - ASGI server
+
+### Google Integration
+- `google-api-python-client==2.170.0` - Google APIs
+- `google_auth_oauthlib==1.2.2` - OAuth authentication
+
+### Database & Vector Search
+- `pgvector==0.4.1` - PostgreSQL vector extension
+- `psycopg==3.2.9` - PostgreSQL adapter
+- `sqlalchemy==2.0.41` - Database ORM
+
+### AI & ML
+- `sentence-transformers==4.1.0` - Text embeddings
+- `tavily-python==0.7.3` - Web search
+- `agno==1.5.6` - AI agent framework
+
+### Utilities
+- `pypdf==5.6.0` - PDF processing
+- `dotenv==0.9.9` - Environment variables
 
 ## Development
 
