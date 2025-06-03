@@ -3,19 +3,23 @@ import dotenv
 import datetime
 
 # Prompts
-from .prompts.calendar import prompt_calendar, prompt_calendar_auxiliar
-from .prompts.revisor import prompt_revisor
-from .prompts.helper import prompt_helper
-from .prompts.identifier import prompt_identifier
+from src.agents.prompts.calendar import prompt_calendar, prompt_calendar_auxiliar
+from src.agents.prompts.revisor import prompt_revisor
+from src.agents.prompts.helper import prompt_helper
+from src.agents.prompts.identifier import prompt_identifier
 
 # Agno
 from agno.storage.sqlite import SqliteStorage
 from agno.tools.tavily import TavilyTools
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
+from agno.models.litellm import LiteLLM
+from agno.embedder.sentence_transformer import SentenceTransformerEmbedder
+from agno.knowledge.pdf import PDFKnowledgeBase, PDFReader
+from agno.vectordb.pgvector import PgVector
 
 # Tools
-from ..tools.calendar_tools import (
+from src.tools.calendar_tools import (
     get_calendar_events,
     create_calendar_event,
     current_time_tool,
@@ -25,7 +29,6 @@ from ..tools.calendar_tools import (
     edit_calendar_event,
     delete_calendar_event,
 )
-from ..tools.rag_tool import search_knowledge_base
 
 dotenv.load_dotenv("config/.env")
 
@@ -42,13 +45,21 @@ calendar_tools = [
 auxiliar_calendar_tools = [
     get_user_email,
 ]
+ 
+tools_search = [TavilyTools()]
 
-web_search_tool = TavilyTools()
-
-tools_search = [web_search_tool, search_knowledge_base]
+pdf_knowledge_base = PDFKnowledgeBase(
+    path="data/Base.pdf",
+    vector_db=PgVector(
+        table_name="sentence_transformer_embeddings",
+        db_url="postgresql+psycopg://ai:ai@localhost:5532/ai",
+        embedder=SentenceTransformerEmbedder(id="sentence-transformers/all-mpnet-base-v2", dimensions=768)
+    ), 
+    reader=PDFReader(chunk=True), 
+)
 
 helper_agent = Agent(
-    model=OpenAIChat(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY")),
+    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
     instructions=prompt_helper,
     tools=tools_search,
     storage=SqliteStorage(table_name="agent_sessions", db_file="database/tmp/data.db"),
@@ -56,24 +67,28 @@ helper_agent = Agent(
     num_history_runs=5,
     show_tool_calls=True,
     markdown=True,
+    knowledge=pdf_knowledge_base,
+    search_knowledge=True,
 )
+ 
+helper_agent.knowledge.load(recreate=True) 
 
 verifier_agent = Agent(
-    model=OpenAIChat(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY")),
+    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
     instructions=prompt_revisor,
     tools=[],
     markdown=True,
 )
 
 request_identifier_agent = Agent(
-    model=OpenAIChat(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY")),
+    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
     instructions=prompt_identifier,
     tools=[],
     markdown=True,
 )
 
 calendar_agent = Agent(
-    model=OpenAIChat(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY")),
+    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
     instructions=prompt_calendar,
     tools=calendar_tools,
     storage=SqliteStorage(table_name="agent_sessions", db_file="database/tmp/data.db"),
@@ -84,7 +99,7 @@ calendar_agent = Agent(
 )
 
 auxiliar_calendar_agent = Agent(
-    model=OpenAIChat(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY")),
+    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
     instructions=prompt_calendar_auxiliar,
     tools=auxiliar_calendar_tools,
     storage=SqliteStorage(table_name="agent_sessions", db_file="database/tmp/data.db"),
@@ -136,23 +151,23 @@ def bot_main(user_input: str, username: str, user_permissions: dict = None, perm
     request = request_identifier_agent.run(user_input + "\nUsuário: " + username + permission_context).content
 
     # Se for uma requisição de ajuda, chama o agente de ajuda
-    if request == "Ajuda" or ("Ajuda" in request and len(request) > 15):
+    if request == "Help" or ("Help" in request and len(request) > 15):
         response = helper_agent.run(user_input + "\nUsuário: " + username).content
 
         # Verifica se a resposta gerada atende aos critérios
         verification_result = verifier_agent.run(response).content
 
-        if "Resposta válida" in verification_result:
+        if "Valid response" in verification_result:
             return response
-        elif "Texto revisado" in verification_result:
-            res = verification_result.split("Texto revisado: ", 1)
+        elif "Revised text:" in verification_result:
+            res = verification_result.split("Revised text: ", 1)
             splitRes = str(res[1].strip())
             return splitRes
         else:
             return verification_result
 
     # Se for uma requisição de calendário, chama o agente de calendário.
-    elif request == "Calendário" or ("Calendário" in request and len(request) > 20):
+    elif request == "Calendar" or ("Calendar" in request and len(request) > 20):
         envolvidos = auxiliar_calendar_agent.run(user_input + "\nUsuário: " + username).content
 
         if envolvidos == "Não foi possível encontrar o email de um dos convidados.":
@@ -179,10 +194,10 @@ def bot_main(user_input: str, username: str, user_permissions: dict = None, perm
     else:
         response = verifier_agent.run(request).content
 
-        if "Resposta válida" in response:
+        if "Valid response" in response:
             return request
-        elif "Texto revisado" in response:
-            res = response.split("Texto revisado: ", 1)
+        elif "Revised text" in response:
+            res = response.split("Revised text: ", 1)
             splitRes = str(res[1].strip())
             return splitRes
         else:
