@@ -13,7 +13,6 @@ from agno.storage.sqlite import SqliteStorage
 from agno.tools.tavily import TavilyTools
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
-from agno.models.litellm import LiteLLM
 from agno.embedder.sentence_transformer import SentenceTransformerEmbedder
 from agno.knowledge.pdf import PDFKnowledgeBase, PDFReader
 from agno.vectordb.pgvector import PgVector
@@ -59,7 +58,7 @@ pdf_knowledge_base = PDFKnowledgeBase(
 )
 
 helper_agent = Agent(
-    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
+    model=OpenAIChat(id="gpt-4o"),
     instructions=prompt_helper,
     tools=tools_search,
     storage=SqliteStorage(table_name="agent_sessions", db_file="database/tmp/data.db"),
@@ -74,21 +73,21 @@ helper_agent = Agent(
 helper_agent.knowledge.load(recreate=True) 
 
 verifier_agent = Agent(
-    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
+    model=OpenAIChat(id="gpt-4o"),
     instructions=prompt_revisor,
     tools=[],
     markdown=True,
 )
 
 request_identifier_agent = Agent(
-    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
+    model=OpenAIChat(id="gpt-4o"),
     instructions=prompt_identifier,
     tools=[],
     markdown=True,
 )
 
 calendar_agent = Agent(
-    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
+    model=OpenAIChat(id="gpt-4o"),
     instructions=prompt_calendar,
     tools=calendar_tools,
     storage=SqliteStorage(table_name="agent_sessions", db_file="database/tmp/data.db"),
@@ -99,7 +98,7 @@ calendar_agent = Agent(
 )
 
 auxiliar_calendar_agent = Agent(
-    model=LiteLLM(id="gpt-4o", api_key=os.getenv("LITE_LLM_API_KEY"), api_base=os.getenv("LITE_LLM_BASE_URL")),
+    model=OpenAIChat(id="gpt-4o"),
     instructions=prompt_calendar_auxiliar,
     tools=auxiliar_calendar_tools,
     storage=SqliteStorage(table_name="agent_sessions", db_file="database/tmp/data.db"),
